@@ -61,6 +61,9 @@ autoscaling:
 ingress:
   enabled: false
 
+httpRoute:
+  enabled: false
+
 volumes: []
 volumeMounts: []
 
