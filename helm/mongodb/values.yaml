@@ -1,0 +1,69 @@
+# Default values for mongodb.
+replicaCount: 1
+
+image:
+  repository: mongo
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "mongodb"
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 27017
+
+# MongoDB specific configuration
+mongodb:
+  auth:
+    rootUsername: root
+    rootPassword: admin  # CHANGE THIS IN PRODUCTION
+
+  persistence:
+    enabled: true
+    storageClass: gp2  # AWS EBS GP2 for EKS
+    size: 5Gi
+
+  env:
+    - name: MONGO_INITDB_ROOT_USERNAME
+      value: root
+    - name: MONGO_INITDB_ROOT_PASSWORD
+      value: admin  # CHANGE THIS IN PRODUCTION
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Disable HTTP probes for MongoDB
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

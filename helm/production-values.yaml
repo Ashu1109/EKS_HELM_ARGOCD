@@ -1,0 +1,90 @@
+# Production Values Override Example
+# Use this file to override default values for production deployments
+#
+# Usage:
+#   helm install mongodb ./helm/mongodb -f helm/production-values.yaml -n chat-app
+#   OR update ArgoCD application to use this file
+
+# Example for MongoDB
+mongodb:
+  replicaCount: 1
+
+  mongodb:
+    auth:
+      rootUsername: root
+      rootPassword: "CHANGE_ME_STRONG_PASSWORD"  # Use AWS Secrets Manager in production
+
+    persistence:
+      enabled: true
+      storageClass: gp3  # Use GP3 for better performance in production
+      size: 20Gi  # Increase for production
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+
+---
+# Example for Backend
+backend:
+  replicaCount: 3  # Multiple replicas for HA
+
+  image:
+    tag: "v1.0.0"  # Use specific version tags in production
+
+  backend:
+    env:
+      - name: MONGODB_URI
+        value: "mongodb://root:CHANGE_PASSWORD@mongodb:27017/chatApp?authSource=admin"
+      - name: PORT
+        value: "5001"
+      - name: NODE_ENV
+        value: "production"
+      - name: JWT_SECRET
+        value: "CHANGE_ME_STRONG_JWT_SECRET"  # Use Kubernetes secrets in production
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+---
+# Example for Frontend
+frontend:
+  replicaCount: 3  # Multiple replicas for HA
+
+  image:
+    tag: "v1.0.0"  # Use specific version tags
+
+  service:
+    type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Network Load Balancer
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70

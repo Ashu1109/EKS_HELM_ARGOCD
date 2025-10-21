@@ -1,0 +1,69 @@
+# Default values for backend.
+replicaCount: 2
+
+image:
+  repository: iemafzal/backend
+  pullPolicy: Always
+  tag: "v1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "backend"
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5001
+
+# Backend specific configuration
+backend:
+  env:
+    - name: MONGODB_URI
+      value: "mongodb://root:admin@mongodb:27017/chatApp?authSource=admin"
+    - name: PORT
+      value: "5001"
+    - name: NODE_ENV
+      value: "production"
+    - name: JWT_SECRET
+      value: "your_jwt_secret_key_change_in_production"  # CHANGE THIS IN PRODUCTION
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+ingress:
+  enabled: false
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
