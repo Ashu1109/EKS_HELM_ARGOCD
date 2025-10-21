@@ -1,0 +1,6 @@
+apiVersion: v2
+name: grafana
+description: Grafana dashboards for chat application
+type: application
+version: 1.0.0
+appVersion: "10.2.0"

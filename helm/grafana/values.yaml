@@ -1,0 +1,91 @@
+# Grafana configuration
+grafana:
+  enabled: true
+  adminPassword: "admin123"
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+  
+  # Ingress configuration
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - grafana.chatapp.local
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.chatapp.local
+  
+  # Persistence
+  persistence:
+    enabled: true
+    storageClassName: "standard"
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  # Grafana configuration
+  grafana.ini:
+    server:
+      domain: grafana.chatapp.local
+      root_url: https://grafana.chatapp.local
+    security:
+      admin_user: admin
+      admin_password: admin123
+    auth.anonymous:
+      enabled: true
+      org_name: "Chat App"
+      org_role: "Viewer"
+    users:
+      allow_sign_up: false
+      auto_assign_org: true
+      auto_assign_org_role: "Viewer"
+  
+  # Dashboard providers
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  
+  # Dashboards
+  dashboards:
+    default:
+      chat-app-overview:
+        gnetId: 1860
+        revision: 27
+        datasource: Prometheus
+      kubernetes-cluster-monitoring:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+      node-exporter:
+        gnetId: 1860
+        revision: 27
+        datasource: Prometheus
+  
+  # Data sources
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server.monitoring.svc.cluster.local:80
+        access: proxy
+        isDefault: true
+        editable: true

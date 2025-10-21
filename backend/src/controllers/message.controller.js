@@ -3,11 +3,14 @@ import Message from "../models/message.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { messagesTotal } from "../lib/metrics.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+    const filteredUsers = await User.find({
+      _id: { $ne: loggedInUserId },
+    }).select("-password");
 
     res.status(200).json(filteredUsers);
   } catch (error) {
@@ -56,6 +59,10 @@ export const sendMessage = async (req, res) => {
     });
 
     await newMessage.save();
+
+    // Track message metrics
+    const messageType = image ? "image" : "text";
+    messagesTotal.labels(messageType).inc();
 
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {

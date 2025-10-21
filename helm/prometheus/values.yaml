@@ -1,0 +1,97 @@
+kube-prometheus-stack:
+  # Prometheus configuration
+  prometheus:
+    enabled: true
+    prometheusSpec:
+      replicas: 1
+      retention: 15d
+      storageSpec: null
+      serviceMonitorSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      additionalScrapeConfigs:
+        - job_name: 'chat-app-backend'
+          static_configs:
+            - targets: ['backend-service:3000']
+          metrics_path: '/metrics'
+          scrape_interval: 15s
+        - job_name: 'chat-app-frontend'
+          static_configs:
+            - targets: ['frontend-service:80']
+          metrics_path: '/metrics'
+          scrape_interval: 15s
+
+  # Grafana configuration
+  grafana:
+    enabled: true
+    admin:
+      existingSecret: ""
+      userKey: admin-user
+      passwordKey: admin-password
+    service:
+      type: ClusterIP
+      port: 80
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - grafana.chatapp.local
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.chatapp.local
+    persistence:
+      enabled: false
+      storageClassName: "standard"
+      size: 5Gi
+    grafana.ini:
+      server:
+        domain: grafana.chatapp.local
+        root_url: https://grafana.chatapp.local
+      auth.anonymous:
+        enabled: true
+        org_name: "Chat App"
+        org_role: "Viewer"
+
+  # AlertManager configuration
+  alertmanager:
+    enabled: true
+    alertmanagerSpec:
+      storage: null
+
+  # Node Exporter for node metrics
+  nodeExporter:
+    enabled: true
+
+  # Kube State Metrics
+  kubeStateMetrics:
+    enabled: true
+
+  # Service Monitor for chat app
+  additionalServiceMonitors:
+    - name: chat-app-backend
+      selector:
+        matchLabels:
+          app: backend
+      endpoints:
+        - port: http
+          path: /metrics
+      namespaceSelector:
+        matchNames:
+          - default
+    - name: chat-app-frontend
+      selector:
+        matchLabels:
+          app: frontend
+      endpoints:
+        - port: http
+          path: /metrics
+      namespaceSelector:
+        matchNames:
+          - default
+
+  # Prometheus Operator
+  prometheusOperator:
+    enabled: true
+    createCustomResource: true

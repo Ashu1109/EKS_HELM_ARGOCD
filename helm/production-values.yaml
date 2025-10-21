@@ -88,3 +88,40 @@ frontend:
     minReplicas: 3
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
+
+---
+# Monitoring Stack Configuration
+prometheus:
+  kube-prometheus-stack:
+    prometheus:
+      prometheusSpec:
+        retention: 30d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "gp3"
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 50Gi
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+
+    grafana:
+      adminPassword: "CHANGE_ME_STRONG_PASSWORD"
+      persistence:
+        enabled: true
+        storageClassName: "gp3"
+        size: 10Gi
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 512Mi

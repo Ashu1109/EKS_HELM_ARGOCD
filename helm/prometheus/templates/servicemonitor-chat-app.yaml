@@ -1,0 +1,59 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chat-app-backend
+  namespace: monitoring
+  labels:
+    app: chat-app-backend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - default
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chat-app-frontend
+  namespace: monitoring
+  labels:
+    app: chat-app-frontend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - default
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mongodb
+  namespace: monitoring
+  labels:
+    app: mongodb
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  endpoints:
+    - port: mongodb
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - default
