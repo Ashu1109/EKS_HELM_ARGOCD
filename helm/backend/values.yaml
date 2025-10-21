@@ -41,6 +41,8 @@ backend:
       value: "production"
     - name: JWT_SECRET
       value: "your_jwt_secret_key_change_in_production"  # CHANGE THIS IN PRODUCTION
+    - name: CLIENT_URL
+      value: "http://a9d95714f5cab4a5ab73e2d9869e588f-1726112896.ap-south-1.elb.amazonaws.com"
 
 resources:
   limits:
