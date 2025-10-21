@@ -25,6 +25,10 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 5001
+  sessionAffinity: ClientIP  # Sticky sessions for Socket.io
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
 
 # Backend specific configuration
 backend:
