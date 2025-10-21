@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/<YOUR-USERNAME>/<YOUR-REPO>.git  # CHANGE THIS
+    repoURL: https://github.com/Ashu1109/EKS_HELM_ARGOCD.git  # CHANGE THIS
     targetRevision: main
     path: helm/mongodb
     helm:
