@@ -38,7 +38,7 @@ backend:
     - name: PORT
       value: "5001"
     - name: NODE_ENV
-      value: "production"
+      value: "development"  # Set to development to disable secure cookies (allows HTTP)
     - name: JWT_SECRET
       value: "your_jwt_secret_key_change_in_production"  # CHANGE THIS IN PRODUCTION
     - name: CLIENT_URL
