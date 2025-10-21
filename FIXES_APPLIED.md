@@ -129,6 +129,40 @@ Added session affinity configuration to the service template.
 
 ---
 
+### 5. Cookie and JWT Token Forwarding
+
+**Problem**: After successful login, API requests to get users were returning 401 Unauthorized errors because JWT tokens/cookies were not being forwarded from frontend to backend through the Nginx proxy.
+
+**Error** (from logs):
+```
+POST /api/auth/login HTTP/1.1" 200  # Login successful
+GET /api/messages/users HTTP/1.1" 401  # But users API returns unauthorized
+```
+
+**Symptoms**:
+- Login works but user cannot access protected API endpoints
+- "No users available" shown in UI
+- 401 errors for authenticated API calls
+
+**Solution**: Updated Nginx configuration to properly forward cookies and origin headers.
+
+**Changes to `helm/frontend/values.yaml`**:
+Added cookie forwarding headers to both `/api/` and `/socket.io/` locations:
+```nginx
+proxy_set_header Origin $http_origin;
+proxy_set_header Cookie $http_cookie;
+proxy_pass_header Set-Cookie;
+```
+
+These headers ensure that:
+- Cookies are forwarded from client to backend
+- Set-Cookie headers from backend reach the client
+- Origin header is preserved for CORS
+
+**Commit**: `cbf270a` - "Fix: Add Cookie and Origin headers forwarding for JWT authentication"
+
+---
+
 ## Deployment Architecture
 
 ```
@@ -203,7 +237,10 @@ http://a9d95714f5cab4a5ab73e2d9869e588f-1726112896.ap-south-1.elb.amazonaws.com
 - [x] User registration works
 - [x] User login works
 - [x] Socket.io connections established
-- [ ] WebSocket connections stable (reduced 400 errors)
+- [x] Cookie/JWT forwarding working
+- [x] Protected API endpoints accessible after login
+- [x] Users list loading correctly
+- [ ] WebSocket connections stable (monitoring)
 - [ ] Real-time messaging works
 - [ ] No frequent disconnections
 
@@ -243,6 +280,7 @@ All fixes have been committed to the main branch:
 2. `99fd3c7` - Fix: Add missing httpRoute configuration to all Helm values
 3. `5f27380` - Fix: Improve Nginx WebSocket configuration for Socket.io connections
 4. `96ea76f` - Fix: Add session affinity (sticky sessions) for Socket.io WebSocket connections
+5. `cbf270a` - Fix: Add Cookie and Origin headers forwarding for JWT authentication
 
 ## Next Steps
 
